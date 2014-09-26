@@ -9,7 +9,7 @@
 #include <root/TBranch.h>
 #include <root/TIterator.h>
 
-#include <atools/tupledata.hh>
+#include <rtools/tupledata.hh>
 
 // Constructor.
 TupleData::TupleData( const std::string& branch, const std::string& files )

@@ -15,6 +15,7 @@
 #include <atools/ConfigFile.hh>
 #include <atools/blind.hh>
 #include <atools/utils.hh>
+#include <atools/math.hh>
 
 
 

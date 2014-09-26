@@ -10,11 +10,11 @@
 #include <cfit/dataset.hh>
 #include <cfit/function.hh>
 
-#include <atools/contour.hh>
+#include <atools/data.hh>
 #include <atools/utils.hh>
 
-#include <atools/data.hh>
-#include <atools/adaptivedalitz.hh>
+#include <rtools/adaptivedalitz.hh>
+#include <rtools/contour.hh>
 
 
 

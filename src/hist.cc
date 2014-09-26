@@ -5,9 +5,10 @@
 #include <cfit/pdfmodel.hh>
 #include <cfit/pdfexpr.hh>
 
-#include <atools/hist.hh>
-#include <atools/lines.hh>
 #include <atools/utils.hh>
+
+#include <rtools/hist.hh>
+#include <rtools/lines.hh>
 
 #include <root/TCanvas.h>
 #include <root/TList.h>

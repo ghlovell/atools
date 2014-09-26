@@ -3,7 +3,7 @@
 #include <cfit/pdfmodel.hh>
 #include <cfit/pdfexpr.hh>
 
-#include <atools/graph.hh>
+#include <rtools/graph.hh>
 
 #include <root/TCanvas.h>
 #include <root/TGraph.h>

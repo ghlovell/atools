@@ -8,9 +8,10 @@
 
 #include <cfit/function.hh>
 
-#include <atools/dalitz.hh>
 #include <atools/utils.hh>
-#include <atools/contour.hh>
+
+#include <rtools/contour.hh>
+#include <rtools/dalitz.hh>
 
 
 
