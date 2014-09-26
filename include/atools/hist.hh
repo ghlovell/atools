@@ -33,11 +33,6 @@ private:
 
   bool                    _logscale;
 
-  const int    bin       ( const double& val ) const;
-  const double binCenter ( const int&    bin ) const;
-  const double binContent( const int&    bin ) const { return _binContent[ bin ]; };
-  static const double binCenter( const int& bin, const int& nbins, const double& min, const double& max );
-
   TH1D* residuals( const TH1D& data, const TH1D* pdf ) const;
 
   // TEMPORARY FUNCTION WHILE THERE'S NO PdfBase PROJECTION FUNCTION.
@@ -83,6 +78,11 @@ public:
   void setField( const std::string& field ) { _field = field; }
 
   void draw    ( const std::string& file = "" ) const;
+
+  const int    bin       ( const double& val ) const;
+  const double binCenter ( const int&    bin ) const;
+  const double binContent( const int&    bin ) const { return _binContent[ bin ]; };
+  static const double binCenter( const int& bin, const int& nbins, const double& min, const double& max );
 };
 
 
