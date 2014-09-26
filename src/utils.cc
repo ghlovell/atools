@@ -316,7 +316,7 @@ void Utils::contour( const unsigned& sigmas,
   }
 
   // Set the error definition to produce the requested contour.
-  nlls.setUp( std::pow( sigmas, 2 ) );
+  nlls.setUp( Math::chiSqLevel( sigmas ) );
 
   // Obtain the vectors of the contours.
   MnContours contours( nlls, min );

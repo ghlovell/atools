@@ -12,5 +12,6 @@ private:
 public:
   static const double errorLo( const double& n, const double& cl = 0.682689492137085963 );
   static const double errorHi( const double& n, const double& cl = 0.682689492137085963 );
+  static const double chiSqLevel( const double& nSigma, const double& nVar = 2 );
 };
 

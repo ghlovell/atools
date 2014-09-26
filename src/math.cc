@@ -692,3 +692,9 @@ const double Math::errorHi( const double& n, const double& cl )
   return invincompletegammac( n + 1.0, tail ) - n;
 }
 
+
+const double Math::chiSqLevel( const double& nSigma, const double& nVar )
+{
+  return 2.0 * invincompletegammac( nVar / 2.0, incompletegammac( 0.5, std::pow( nSigma, 2 ) / 2.0 ) );
+}
+
