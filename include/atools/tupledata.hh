@@ -29,7 +29,7 @@ private:
   std::map< std::string, void* > _values;
 
 public:
-  TupleData( const std::string& files = "" );
+  TupleData( const std::string& branch, const std::string& files = "" );
   ~TupleData();
 
   void listBranches() const;

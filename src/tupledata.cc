@@ -12,13 +12,13 @@
 #include <atools/tupledata.hh>
 
 // Constructor.
-TupleData::TupleData( const std::string& files )
+TupleData::TupleData( const std::string& branch, const std::string& files )
   : _chain( 0 )
 {
   if ( files == "" )
     return;
 
-  _chain = new TChain( "gamma/kshh" );
+  _chain = new TChain( branch.data() );
   _current = -1;
 
   // Tokenize the elements of the files string to add them individually.
