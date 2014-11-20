@@ -6,6 +6,7 @@
 
 #include <atools/blind.hh>
 
+class Amplitude;
 class ConfigFile;
 class FunctionMinimum;
 class MnUserParameters;
@@ -40,6 +41,10 @@ public:
 
     return "";
   }
+
+
+  static const unsigned hash( const std::string& input );
+  static const unsigned hash( const Amplitude&   amp   );
 
   static const std::string replace( const std::string& str, const std::string& pattern, const std::string& replacement );
 

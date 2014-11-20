@@ -11,11 +11,47 @@
 
 #include <cfit/parameter.hh>
 #include <cfit/minimizerexpr.hh>
+#include <cfit/amplitude.hh>
 
 #include <atools/ConfigFile.hh>
 #include <atools/blind.hh>
 #include <atools/utils.hh>
 #include <atools/math.hh>
+
+
+
+// Compute the Jenkins one-at-a-time hash of an input string.
+const unsigned Utils::hash( const std::string& input )
+{
+  unsigned h = 0;
+
+  for ( std::string::const_iterator c = input.begin(); c != input.end(); ++c )
+  {
+    h += *c;
+    h += ( h << 10 );
+    h ^= ( h >> 6 );
+  }
+
+  h += ( h << 3 );
+  h ^= ( h >> 11 );
+  h += ( h << 15 );
+
+  return h;
+}
+
+
+// Calculate a hash based on all the parameter values of an amplitude.
+const unsigned Utils::hash( const Amplitude& amp )
+{
+  const std::map< std::string, Parameter >& pars = amp.getPars();
+
+  std::ostringstream str;
+  for ( auto par : pars )
+    str << std::setprecision( 10 ) << par.first << par.second.value();
+
+  return hash( str.str() );
+}
+
 
 
 
