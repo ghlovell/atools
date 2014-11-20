@@ -12,6 +12,7 @@ class FunctionMinimum;
 class MnUserParameters;
 class MnUserCovariance;
 class Parameter;
+class Coef;
 class MinimizerExpr;
 class FunctionMinimum;
 
@@ -53,8 +54,9 @@ public:
   static const std::string getOutput( const MnUserParameters& pars );
   static const std::string getOutput( const MnUserParameters& pars, const MnUserCovariance& cov );
 
-  static const Parameter   makePar( const std::string& name, std::string        info );
-  static const Parameter   makePar( const ConfigFile&  file, const std::string& name );
+  static const Parameter   makePar ( const std::string& name, std::string info        );
+  static const Parameter   makePar ( const ConfigFile&  file, const std::string& name );
+  static const Coef        makeCoef( const ConfigFile&  name, const std::string& re  , const std::string& im );
 
   static const double      residual( const double& datum, const double& pdf );
 

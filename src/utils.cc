@@ -10,6 +10,7 @@
 #include <Minuit/MnContours.h>
 
 #include <cfit/parameter.hh>
+#include <cfit/coef.hh>
 #include <cfit/minimizerexpr.hh>
 #include <cfit/amplitude.hh>
 
@@ -241,23 +242,6 @@ const std::string Utils::getOutput( const MnUserParameters& pars, const MnUserCo
 }
 
 
-
-// Create a cfit Parameter from a configuration file and the
-//    parameter name to be read from it.
-const Parameter Utils::makePar( const ConfigFile& config, const std::string& name )
-{
-  std::string kstype = "";
-  try
-  {
-    kstype = config.read< std::string >( "kstype" );
-  }
-  catch( ConfigFile::key_not_found& exc )
-  {}
-
-  return makePar( name + ( kstype != "" ? "_" : "" ) + kstype, config.read< std::string >( name ) );
-}
-
-
 const Parameter Utils::makePar( const std::string& name, std::string info )
 {
   info = Utils::replace( info, "(", " (" ); // Make the L a different token.
@@ -320,6 +304,31 @@ const Parameter Utils::makePar( const std::string& name, std::string info )
 
   return par;
 }
+
+
+
+// Create a cfit Parameter from a configuration file and the
+//    parameter name to be read from it.
+const Parameter Utils::makePar( const ConfigFile& config, const std::string& name )
+{
+  std::string kstype = "";
+  try
+  {
+    kstype = config.read< std::string >( "kstype" );
+  }
+  catch( ConfigFile::key_not_found& exc )
+  {}
+
+  return makePar( name + ( kstype != "" ? "_" : "" ) + kstype, config.read< std::string >( name ) );
+}
+
+
+
+const Coef Utils::makeCoef( const ConfigFile& config, const std::string& re, const std::string& im )
+{
+  return Coef( makePar( config, re ), makePar( config, im ) );
+}
+
 
 
 const double Utils::residual( const double& datum, const double& pdf )
