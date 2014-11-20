@@ -44,9 +44,8 @@ void Graph::draw( const std::string& file ) const
   for ( double x = _min; x <= _max; x += step )
   {
     vars[ 0 ] = x;
-    _pdf->setVars( vars );
-    xdata.push_back( x                );
-    ydata.push_back( _pdf->evaluate() );
+    xdata.push_back( x                      );
+    ydata.push_back( _pdf->evaluate( vars ) );
   }
 
   // Find the maximum y value.

@@ -110,7 +110,7 @@ void Dalitz::addData( const Dataset& data, const std::string& field1, const std:
 }
 
 
-void Dalitz::setData( Function data, const std::string& field1, const std::string& field2 )
+void Dalitz::setData( const Function& data, const std::string& field1, const std::string& field2 )
 {
   // Set all bin contents to zero.
   typedef std::vector< std::vector< double > >::iterator vIter;
@@ -125,12 +125,9 @@ void Dalitz::setData( Function data, const std::string& field1, const std::strin
     {
       x = binCenter( binX );
       y = binCenter( binY );
+
       if ( _ps.contains( x, y ) )
-      {
-        data.setVar( field1, x );
-        data.setVar( field2, y );
-        _binContent[ binX ][ binY ] = data.evaluate();
-      }
+        _binContent[ binX ][ binY ] = data.evaluate( { { field1, x }, { field2, y } } );
     }
 }
 
@@ -154,6 +151,10 @@ Dalitz* Dalitz::residuals( const PdfExpr& pdf, const std::string& field1, const 
   // Fill the bin contents with the value of the function at every bin center.
   Dalitz* dalitz = new Dalitz( _nbins, _ps );
 
+  std::map< std::string, double > varMap;
+
+  std::vector< double > vars;
+
   for ( int binX = 0; binX < _nbins; ++binX )
     for ( int binY = 0; binY < _nbins; ++binY )
     {
@@ -162,11 +163,14 @@ Dalitz* Dalitz::residuals( const PdfExpr& pdf, const std::string& field1, const 
       z = mSqSum - x - y;
       if ( _ps.contains( x, y ) )
       {
-        model.setVar( field1, x );
-        model.setVar( field2, y );
-        model.setVar( field3, z );
+        varMap[ field1 ] = x;
+        varMap[ field2 ] = y;
+        varMap[ field3 ] = z;
 
-        double pdfval = integral * std::pow( ( _max - _min ) / double( _nbins ), 2 ) * model.evaluate();
+        vars.clear();
+        std::transform( varMap.begin(), varMap.end(), std::back_inserter( vars ), []( const std::pair< std::string, double >& val ){ return val.second; } );
+
+        double pdfval = integral * std::pow( ( _max - _min ) / double( _nbins ), 2 ) * model.evaluate( vars );
 
         dalitz->_binContent[ binX ][ binY ] = Utils::residual( _binContent[ binX ][ binY ], pdfval );
       }

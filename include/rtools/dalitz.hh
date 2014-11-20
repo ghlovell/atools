@@ -37,7 +37,7 @@ public:
   void setData ( const Dataset& data, const std::string& field1, const std::string& field2 );
   void addData ( const Dataset& data, const std::string& field1, const std::string& field2 );
 
-  void setData ( Function data, const std::string& field1, const std::string& field2 );
+  void setData ( const Function& data, const std::string& field1, const std::string& field2 );
 
   void draw( const std::string& file = "" );
 

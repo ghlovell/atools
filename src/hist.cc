@@ -152,9 +152,8 @@ TH1D* Hist::getHist( const std::string& field, const double& area ) const
   for ( int x = 0; x < _nbins; ++x )
   {
     vals[ 0 ] = binCenter( x, _nbins, _min, _max );
-    _pdf->setVars( vals );
 
-    double yVal = _pdf->evaluate();
+    double yVal = _pdf->evaluate( vals );
 
     pdf->SetBinContent( x + 1, area * yVal * ( _max - _min ) / double( _nbins ) );
   }
