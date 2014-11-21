@@ -128,13 +128,15 @@ TH1D* Hist::project( const std::string& field, const double& area ) const
 {
   TH1D* pdf = new TH1D( ( "pdf_" + _name ).c_str(), _title.c_str(), _nbins, _min, _max );
 
+  const double&& yield = _pdf->yield();
+
   // Evaluate the model in a wide region of points.
   double pdfval = 0.0;
   for ( int x = 0; x < _nbins; ++x )
   {
     pdfval = _pdf->project( field, binCenter( x, _nbins, _min, _max ) );
 
-    pdf->SetBinContent( x + 1, area * pdfval * ( _max - _min ) / double( _nbins ) );
+    pdf->SetBinContent( x + 1, area * pdfval * ( _max - _min ) / double( _nbins * yield ) );
   }
 
   return pdf;
@@ -148,6 +150,8 @@ TH1D* Hist::getHist( const std::string& field, const double& area ) const
 
   std::vector< double > vals( 1 );
 
+  const double&& yield = _pdf->yield();
+
   // Evaluate the model in a wide region of points.
   for ( int x = 0; x < _nbins; ++x )
   {
@@ -155,7 +159,7 @@ TH1D* Hist::getHist( const std::string& field, const double& area ) const
 
     double yVal = _pdf->evaluate( vals );
 
-    pdf->SetBinContent( x + 1, area * yVal * ( _max - _min ) / double( _nbins ) );
+    pdf->SetBinContent( x + 1, area * yVal * ( _max - _min ) / double( _nbins * yield ) );
   }
 
   return pdf;
@@ -222,6 +226,7 @@ void Hist::draw( const TCanvas& canvas, TH1D& data, TH1D* resids, TH1D* pdf ) co
   cosmeticsResids( resids );
   cosmeticsPads  ( padHisto, padResid );
   pdf->SetLineColor( kBlue );
+  pdf->SetLineWidth( 2 );
 
   // Plot the data histogram and the function.
   padHisto->cd();
