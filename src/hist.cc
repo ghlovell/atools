@@ -128,13 +128,20 @@ TH1D* Hist::project( const std::string& field, const double& area ) const
 {
   TH1D* pdf = new TH1D( ( "pdf_" + _name ).c_str(), _title.c_str(), _nbins, _min, _max );
 
-  const double&& yield = _pdf->yield();
+  double&& yield = _pdf->yield();
 
   // Evaluate the model in a wide region of points.
   double pdfval = 0.0;
   for ( int x = 0; x < _nbins; ++x )
   {
     pdfval = _pdf->project( field, binCenter( x, _nbins, _min, _max ) );
+
+    // Temporarily very dirty integration, until integration is sorted out in cfit.
+    if ( dynamic_cast< PdfModel* >( _pdf ) )
+      yield = dynamic_cast< PdfModel* >( _pdf )->area( _min, _max );
+
+    if ( dynamic_cast< PdfExpr* >( _pdf ) )
+      yield = dynamic_cast< PdfExpr* >( _pdf )->area( _field, _min, _max );
 
     pdf->SetBinContent( x + 1, area * pdfval * ( _max - _min ) / double( _nbins * yield ) );
   }
@@ -182,11 +189,7 @@ void Hist::draw( const std::string& file ) const
   data.SetBinErrorOption( TH1::kPoisson );
 
   // ALERT: this is an allocation. This histogram has to be deallocated in this function.
-  TH1D* pdf = 0;
-  if ( _field == "mSq12" || _field == "mSq13" || _field == "mSq23" )
-    pdf = project( _field, area );
-  else
-    pdf = getHist( _field, area );
+  TH1D* pdf = project( _field, area );
 
   // ALERT: this is an allocation. This histogram has to be deallocated in this function.
   TH1D* resids = residuals( data, pdf );
