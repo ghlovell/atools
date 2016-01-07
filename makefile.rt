@@ -79,7 +79,7 @@ $(DFILES): $(DDIR)/%.d: $(CDIR)/%.cc $(HDIR)/$(firstword $(subst /, ,$(PROJECT))
 	@ $(CXX) -MM -MF $@ -MT $$(echo $@ | sed "s,^$(DDIR),$(ODIR),g;s,\.d$$,\.o,g") $< $(DFLAGS) -I $(HDIR)
 
 # Rules for objects.
-$(OFILES): $(ODIR)/%.o: $(CDIR)/%.cc $(DDIR)/%.d $(PKGHDRS) $(MAKEFILE_LIST) | checkrootsys
+$(OFILES): $(ODIR)/%.o: $(CDIR)/%.cc $(DDIR)/%.d $(PKGHDRS) $(MAKEFILE_LIST) $(PATCHES) | checkrootsys
 	@ mkdir -p $(dir $@)
 	$(CXX) -o $@ -c $< $(CFLAGS)
 
@@ -91,7 +91,10 @@ endif
 # Soft link the root headers to the specified $(HDIR) directory.
 $(HDIR)/root: | checkrootsys
 	@ $(LN) $(ROOTHDR) $@
-	@ touch $(PATCHES)
+#	@ touch $(PATCHES)
+
+$(PATCHES): $(HDIR)/%: $(ROOTHDR)/%
+	@ $(LN) $^ $@
 
 
 # This rule removes libraries that have been linked or copied in the
