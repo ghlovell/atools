@@ -5,6 +5,7 @@
 #include <atools/blind.hh>
 
 
+// Unblind a randomized blind value.
 int main( int argc, char** argv )
 {
   Blind blinder( 4 );

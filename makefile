@@ -8,13 +8,13 @@ all: | checkrootsys
 	$(MAKE) MPI_ON=$(MPI_ON) -f makefile.rt
 
 tidy:
-	$(MAKE) -f makefile.at tidy
+	$(MAKE) -f makefile.rt tidy
 
 sweep:
-	$(MAKE) -f makefile.at sweep
+	$(MAKE) -f makefile.rt sweep
 
 clean:
-	$(MAKE) -f makefile.at clean
+	$(MAKE) -f makefile.rt clean
 
 checkrootsys:
 ifndef ROOTSYS

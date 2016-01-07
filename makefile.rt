@@ -1,5 +1,5 @@
 
-BINLIST = unblind
+BINLIST = runblind reblind
 
 PROJECT = rtools
 
@@ -10,7 +10,8 @@ DDIR = dep$(if $(CMTCONFIG),/$(CMTCONFIG))
 ODIR = obj$(if $(CMTCONFIG),/$(CMTCONFIG))
 LDIR = lib$(if $(CMTCONFIG),/$(CMTCONFIG))
 
-LIBLIST =
+LIBLIST  =
+RLIBLIST = Core Cint RIO Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics MathCore Thread RooFit RooFitCore
 
 OBJLIST = adaptivedalitz contour dalitz graph hist hist2d lines tupledata
 
@@ -43,6 +44,7 @@ LIBSTR   = $(foreach dir,$(LIBDIRS),-L $(dir)) $(foreach lib,$(LIBLIST),-l$(lib)
 CFLAGS   = -O -g -m64 -Wall -fPIC $(HDRSTR)
 DFLAGS   =
 LFLAGS   = -O -g -m64 -Wall -fPIC $(LIBSTR)
+RFLAGS   = -L $(ROOTLIB) $(foreach lib,$(RLIBLIST),-l$(lib))
 
 RM       = rm -rf
 LN       = ln -nfs
@@ -62,9 +64,13 @@ lib:    $(LIB)
 .PHONY: tidy sweep clean checkrootsys
 
 
-$(BDIR)/unblind: $(CDIR)/unblind.cc $(ODIR)/blind.o $(ODIR)/base64.o $(MAKEFILE_LIST)
+$(BDIR)/runblind: $(CDIR)/runblind.cc $(CDIR)/nobanner.cc $(MAKEFILE_LIST)
 	@ mkdir -p $(dir $@)
-	$(CXXL) -o $@ $(filter-out $(MAKEFILE_LIST),$^) $(CFLAGS)
+	$(CXXL) -o $@ $(filter-out $(MAKEFILE_LIST),$^) $(CFLAGS) $(RFLAGS)
+
+$(BDIR)/reblind: $(CDIR)/reblind.cc $(CDIR)/nobanner.cc $(ODIR)/base64.o $(MAKEFILE_LIST)
+	@ mkdir -p $(dir $@)
+	$(CXXL) -o $@ $(filter-out $(MAKEFILE_LIST),$^) $(CFLAGS) $(RFLAGS)
 
 
 # Rule for the library.
