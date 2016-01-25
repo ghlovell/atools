@@ -25,8 +25,9 @@ OBJLIST = adaptivedalitz contour dalitz graph hist hist2d lines tupledata
 # ROOTSYS ?= $(shell . SetupProject.sh Gaudi ROOT -v $(ROOTVER) > /dev/null 2>&1 && echo $$ROOTSYS)
 
 # Find the root header and lib directories.
-ROOTHDR  = $(firstword $(wildcard $(ROOTSYS)/include/root $(ROOTSYS)/include))
-ROOTLIB  = $(firstword $(wildcard $(ROOTSYS)/lib/root     $(ROOTSYS)/lib    ))
+ROOTHDR  = $(shell readlink -e "$(firstword $(wildcard $(ROOTSYS)/include/root $(ROOTSYS)/include))")
+ROOTLIB  = $(shell readlink -e "$(firstword $(wildcard $(ROOTSYS)/lib/root     $(ROOTSYS)/lib    ))")
+ROOTVER  = $(shell root-config --version | sed 's,/,.,g')
 
 # Unexistent files needed by root. I cannot believe root can even compile.
 PATCHES  = $(HDIR)/snprintf.h $(HDIR)/strlcpy.h
@@ -61,7 +62,7 @@ DFILES   = $(foreach dep,$(OBJLIST),$(DDIR)/$(dep).d)
 all:    lib bin
 bin:    $(BFILES)
 lib:    $(LIB)
-.PHONY: tidy sweep clean checkrootsys
+.PHONY: install checkusr tidy sweep clean checkrootsys
 
 
 $(BDIR)/runblind: $(CDIR)/runblind.cc $(CDIR)/nobanner.cc $(MAKEFILE_LIST)
@@ -102,6 +103,18 @@ $(HDIR)/root: | checkrootsys
 $(PATCHES): $(HDIR)/%: $(ROOTHDR)/%
 	@ $(LN) $^ $@
 
+install: | checkusr checkrootsys $(LIB)
+	@ install -d $(usr)/include/$(PROJECT)
+	@ install -d $(usr)/$(LDIR)/root-$(ROOTVER)
+	@ echo "Installing headers in $(usr)/include/$(PROJECT)"
+	@ install -D -m 644 include/$(PROJECT)/*.hh $(usr)/include/$(PROJECT)
+	@ echo "Installing libraries in $(usr)/$(LDIR)/root-$(ROOTVER)"
+	@ install -D -m 755 $(LIB)                  $(usr)/$(LDIR)/root-$(ROOTVER)
+
+checkusr:
+ifndef usr
+	$(error $(shell echo -e '\e[91;1m')usr$(shell echo -e '\e[21m') variable is not set. Define $(shell echo -e '\e[1m')usr$(shell echo -e '\e[21m') to be the destination directory$(shell echo -e '\e[0m'))
+endif
 
 # This rule removes libraries that have been linked or copied in the
 #    specified $(LDIR). These libraries may be needed to run the

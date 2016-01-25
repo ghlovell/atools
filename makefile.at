@@ -48,7 +48,7 @@ DFILES   = $(foreach dep,$(OBJLIST),$(DDIR)/$(dep).d)
 all:    lib bin
 bin:    $(BFILES)
 lib:    $(LIB)
-.PHONY: tidy sweep clean
+.PHONY: install checkusr tidy sweep clean
 
 
 $(BDIR)/unblind: $(CDIR)/unblind.cc $(ODIR)/blind.o $(ODIR)/base64.o $(MAKEFILE_LIST)
@@ -75,6 +75,18 @@ $(OFILES): $(ODIR)/%.o: $(CDIR)/%.cc $(DDIR)/%.d $(PKGHDRS) $(MAKEFILE_LIST)
 # Include all existent dependency files.
 include $(wildcard $(DFILES))
 
+install: | checkusr $(LIB)
+	@ install -d $(usr)/include/$(PROJECT)
+	@ install -d $(usr)/$(LDIR)
+	@ echo "Installing headers in $(usr)/include/$(PROJECT)"
+	@ install -D -m 644 include/$(PROJECT)/*.hh $(usr)/include/$(PROJECT)
+	@ echo "Installing libraries in $(usr)/$(LDIR)"
+	@ install -D -m 755 $(LIB)                  $(usr)/$(LDIR)
+
+checkusr:
+ifndef usr
+	$(error $(shell echo -e '\e[91;1m')usr$(shell echo -e '\e[21m') variable is not set. Define $(shell echo -e '\e[1m')usr$(shell echo -e '\e[21m') to be the destination directory$(shell echo -e '\e[0m'))
+endif
 
 # This rule removes libraries that have been linked or copied in the
 #    specified $(LDIR). These libraries may be needed to run the

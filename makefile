@@ -7,6 +7,12 @@ all: | checkrootsys
 	$(MAKE) MPI_ON=$(MPI_ON) -f makefile.at
 	$(MAKE) MPI_ON=$(MPI_ON) -f makefile.rt
 
+.PHONY: install tidy sweep clean
+
+install:
+	$(MAKE) -f makefile.at install
+	$(MAKE) -f makefile.rt install
+
 tidy:
 	$(MAKE) -f makefile.rt tidy
 
