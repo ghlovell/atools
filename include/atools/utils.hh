@@ -48,6 +48,8 @@ public:
   static const unsigned hash( const Amplitude&   amp   );
 
   static const std::string replace( const std::string& str, const std::string& pattern, const std::string& replacement );
+  static const std::string conjugate( const std::string& str );
+
 
   static const int         precision( const double& value, const int& digits = 20 );
   static const std::string getOutput( const FunctionMinimum&  min  );

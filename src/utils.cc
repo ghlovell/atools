@@ -72,6 +72,21 @@ const std::string Utils::replace( const std::string& str, const std::string& pat
 }
 
 
+const std::string Utils::conjugate( const std::string& str )
+{
+  std::string result = str;
+
+  for ( std::string::iterator ch = result.begin(); ch != result.end(); ++ch )
+  {
+    if      ( *ch == '+' ) *ch = '-';
+    else if ( *ch == '-' ) *ch = '+';
+  }
+
+  return result;
+}
+
+
+
 const int Utils::precision( const double& value, const int& digits )
 {
   return digits - 2 + 2 * ( std::abs( value ) > 1 ) - ( value < 0.0 ) - std::abs( std::ceil( std::log10( std::abs( value ) ) ) );
