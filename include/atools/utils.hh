@@ -60,6 +60,9 @@ public:
 
   static const Parameter   makePar ( const std::string& name, std::string info        );
   static const Parameter   makePar ( const ConfigFile&  file, const std::string& name );
+  static const Parameter   makePar ( const ConfigFile&  file, const std::string& section, const std::string& name );
+  static const Parameter   makePar ( const ConfigFile&  file, const std::string& section, const std::string& name, const std::string& kstype );
+
   static const Coef        makeCoef( const ConfigFile&  name, const std::string& re  , const std::string& im );
 
   static const double      residual( const double& datum, const double& pdf );

@@ -356,6 +356,38 @@ const Parameter Utils::makePar( const ConfigFile& config, const std::string& nam
 
 
 
+// Create a cfit Parameter from a configuration file and the
+//    parameter name to be read from it.
+const Parameter Utils::makePar( const ConfigFile& config, const std::string& section, const std::string& name )
+{
+  std::string kstype = "";
+  try
+  {
+    kstype = config.readSection< std::string >( section, "kstype" );
+  }
+  catch( ConfigFile::key_not_found& exc )
+  {
+    kstype = section;
+  }
+  catch( ConfigFile::section_not_found& exc )
+  {
+    kstype = section;
+  }
+
+  return makePar( name + ( kstype != "" ? "_" : "" ) + kstype, config.readSection< std::string >( section, name ) );
+}
+
+
+
+// Create a cfit Parameter from a configuration file and the
+//    parameter name to be read from it.
+const Parameter Utils::makePar( const ConfigFile& config, const std::string& section, const std::string& name, const std::string& kstype )
+{
+  return makePar( name + ( kstype != "" ? "_" : "" ) + kstype, config.readSection< std::string >( section, name ) );
+}
+
+
+
 const Coef Utils::makeCoef( const ConfigFile& config, const std::string& re, const std::string& im )
 {
   return Coef( makePar( config, re ), makePar( config, im ) );
