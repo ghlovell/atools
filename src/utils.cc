@@ -86,6 +86,23 @@ const std::string Utils::conjugate( const std::string& str )
 }
 
 
+bool Utils::startsWith( const std::string& str, const std::string& start )
+{
+  if ( str.length() < start.length() )
+    return false;
+
+  return str.compare( 0, start.length(), start ) == 0;
+}
+
+
+bool Utils::endsWith( const std::string& str, const std::string& end )
+{
+  if ( str.length() < end.length() )
+    return false;
+
+  return str.compare( str.length() - end.length(), end.length(), end ) == 0;
+}
+
 
 const int Utils::precision( const double& value, const int& digits )
 {
