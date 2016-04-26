@@ -23,6 +23,43 @@ ConfigFile::ConfigFile()
 }
 
 
+
+ConfigFile::mapci ConfigFile::find( const std::string& section, const std::string& wildcard ) const
+{
+  // std::map< std::string, std::map< std::string, std::string > >::const_iterator secmap = myContents.at( section );
+
+  std::map< std::string, std::map< std::string, std::string > >::const_iterator secmap = myContents.find( section );
+
+  if ( secmap == myContents.end() )
+    throw section_not_found( section );
+
+  return std::find_if( secmap->second.begin(), secmap->second.end(),
+                       [&]( std::pair< std::string, std::string > const& name )
+                       {
+                         return std::regex_match( name.first, std::regex( wildcard ) );
+                       } );
+
+  // return std::find_if( myContents.at( section ).begin(), myContents.at( section ).end(),
+  //                      [&]( std::pair< std::string, std::string > const& name)
+  //                      {
+  //                        return std::regex_match( name.first, std::regex( wildcard ) );
+  //                      } );
+}
+
+
+ConfigFile::mapci ConfigFile::find( const std::string& wildcard ) const
+{
+  return find( "default", wildcard );
+
+  // return std::find_if( myContents[ "default" ].begin(), myContents[ "default" ].end(),
+  //                      [&]( std::pair< std::string, std::string > const& name)
+  //                      {
+  //                        return std::regex_match( name.first, std::regex( wildcard ) );
+  //                      } );
+}
+
+
+
 void ConfigFile::remove( const string& key )
 {
   // Remove key and its value
@@ -31,11 +68,21 @@ void ConfigFile::remove( const string& key )
 }
 
 
+bool ConfigFile::keyExists( const std::string& section, const string& key ) const
+{
+  const std::map< std::string, std::string >& secmap = myContents.at( section );
+
+  // Indicate whether key is found
+  mapci p = secmap.find( key );
+  return ( p != secmap.end() );
+}
+
+
+
 bool ConfigFile::keyExists( const string& key ) const
 {
-  // Indicate whether key is found
-  mapci p = myContents.find( key );
-  return ( p != myContents.end() );
+  // Indicate whether key is found in the default section.
+  return keyExists( "default", key );
 }
 
 
@@ -49,11 +96,12 @@ void ConfigFile::trim( string& s )
 }
 
 
+// Dump default section. Modify to dump whole file
 std::ostream& operator<<( std::ostream& os, const ConfigFile& cf )
 {
   // Save a ConfigFile to os
-  for( ConfigFile::mapci p = cf.myContents.begin();
-       p != cf.myContents.end();
+  for( ConfigFile::mapci p = cf.myContents.at( "default" ).begin();
+       p != cf.myContents.at( "default" ).end();
        ++p )
     {
       os << p->first << " " << cf.myDelimiter << " ";
@@ -75,6 +123,9 @@ std::istream& operator>>( std::istream& is, ConfigFile& cf )
 
   string nextline = "";  // might need to read ahead to see where value ends
 
+  // Assign the contents to the default section by default.
+  std::string section = "default";
+
   while( is || nextline.length() > 0 )
     {
       // Read an entire line at a time
@@ -94,6 +145,14 @@ std::istream& operator>>( std::istream& is, ConfigFile& cf )
 
       // Check for end of file sentry
       if( sentry != "" && line.find(sentry) != string::npos ) return is;
+
+      // Parse the section name if it is specified.
+      if ( line.find( '[' ) == 0 )
+      {
+        const std::size_t& len = line.find( ']' ) - 1;
+        section = line.substr( 1, len );
+        continue;
+      }
 
       // Parse the line if it contains a delimiter
       pos delimPos = line.find( delim );
@@ -132,7 +191,7 @@ std::istream& operator>>( std::istream& is, ConfigFile& cf )
 	  // Store key and value
 	  ConfigFile::trim(key);
 	  ConfigFile::trim(line);
-	  cf.myContents[key] = line;  // overwrites if key is repeated
+	  cf.myContents[section][key] = line;  // overwrites if key is repeated
 	}
     }
 
