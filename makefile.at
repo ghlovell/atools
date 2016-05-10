@@ -3,6 +3,8 @@ BINLIST = unblind
 
 PROJECT = atools
 
+TCLAP   = tclap
+
 BDIR = bin
 HDIR = include
 CDIR = src
@@ -77,9 +79,12 @@ include $(wildcard $(DFILES))
 
 install: | checkusr $(LIB)
 	@ install -d $(usr)/include/$(PROJECT)
+	@ install -d $(usr)/include/$(TCLAP)
 	@ install -d $(usr)/$(LDIR)
 	@ echo "Installing headers in $(usr)/include/$(PROJECT)"
 	@ install -D -m 644 include/$(PROJECT)/*.hh $(usr)/include/$(PROJECT)
+	@ echo "Installing headers in $(usr)/include/$(TCLAP)"
+	@ install -D -m 644 include/$(TCLAP)/*      $(usr)/include/$(TCLAP)
 	@ echo "Installing libraries in $(usr)/$(LDIR)"
 	@ install -D -m 755 $(LIB)                  $(usr)/$(LDIR)
 
