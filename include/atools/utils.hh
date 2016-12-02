@@ -53,6 +53,16 @@ public:
   static       bool startsWith( const std::string& str, const std::string& start );
   static       bool endsWith  ( const std::string& str, const std::string& end   );
 
+  template <class T>
+  static       bool contains  ( const std::vector< T >& vec, const T& value )
+  {
+    for ( const T& entry : vec )
+      if ( entry == value )
+        return true;
+
+    return false;
+  }
+
   static const int         precision( const double& value, const int& digits = 20 );
   static const std::string getOutput( const FunctionMinimum&  min  );
   static const std::string getOutput( const MnUserParameters& pars );
