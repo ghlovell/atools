@@ -62,8 +62,22 @@ public:
       _overflow     ( 0.0   ),
       _pdf          ( 0     ),
       _logscale     ( false )
-    {
-    }
+    {}
+
+  Hist( const unsigned& nbins, const std::pair< double, double >& minmax )
+    : _name         ( ""            ),
+      _title        ( ""            ),
+      _withResiduals( true          ),
+      _nbins        ( nbins         ),
+      _min          ( minmax.first  ),
+      _max          ( minmax.second ),
+      _allocatedData( false         ),
+      _underflow    ( 0.0           ),
+      _overflow     ( 0.0           ),
+      _pdf          ( 0             ),
+      _logscale     ( false         )
+    {}
+
 
   void setName ( const std::string& name  ) { _name  = name;  }
   void setTitle( const std::string& title ) { _title = title; }
