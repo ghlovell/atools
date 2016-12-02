@@ -30,7 +30,7 @@ const double Hist::binCenter( const int& bin ) const
 
 
 // Auxiliary function to compute the center of a bin.
-const double Hist::binCenter( const int& bin, const int& nbins, const double& min, const double& max )
+const double Hist::binCenter( const int& bin, const unsigned& nbins, const double& min, const double& max )
 {
   return ( max - min ) / double( nbins ) * ( bin + .5 ) + min;
 }
@@ -49,7 +49,7 @@ void Hist::setData( const Dataset& data, const std::string& field )
 
   std::vector< double > values = data.values( field );
   typedef std::vector< double >::const_iterator dIter;
-  int binIdx; // Bin index.
+  unsigned binIdx; // Bin index.
   for ( dIter dat = values.begin(); dat != values.end(); ++dat )
   {
     binIdx = bin( *dat );
@@ -67,7 +67,7 @@ void Hist::addData( const Dataset& data, const std::string& field )
 {
   std::vector< double > values = data.values( field );
   typedef std::vector< double >::const_iterator dIter;
-  int binIdx; // Bin index.
+  unsigned binIdx; // Bin index.
   for ( dIter dat = values.begin(); dat != values.end(); ++dat )
   {
     binIdx = bin( *dat );
@@ -110,7 +110,7 @@ TH1D* Hist::residuals( const TH1D& data, const TH1D* pdf ) const
   TH1D* residuals = new TH1D( ( "residuals_" + _name ).c_str(), "", _nbins, _min, _max );
   double datum;
   double pdfval;
-  for ( int bin = 0; bin < _nbins; ++bin )
+  for ( unsigned bin = 0; bin < _nbins; ++bin )
   {
     // Root starts numbering from 1.
     datum  = data .GetBinContent( bin + 1 );
@@ -132,7 +132,7 @@ TH1D* Hist::project( const std::string& field, const double& area ) const
 
   // Evaluate the model in a wide region of points.
   double pdfval = 0.0;
-  for ( int x = 0; x < _nbins; ++x )
+  for ( unsigned x = 0; x < _nbins; ++x )
   {
     pdfval = _pdf->project( field, binCenter( x, _nbins, _min, _max ) );
 
@@ -160,7 +160,7 @@ TH1D* Hist::getHist( const std::string& field, const double& area ) const
   const double&& yield = _pdf->yield();
 
   // Evaluate the model in a wide region of points.
-  for ( int x = 0; x < _nbins; ++x )
+  for ( unsigned x = 0; x < _nbins; ++x )
   {
     vals[ 0 ] = binCenter( x, _nbins, _min, _max );
 
@@ -178,7 +178,7 @@ void Hist::draw( const std::string& file ) const
 {
   TH1D data( ( "data_" + _name ).c_str(), _title.c_str(), _nbins, _min, _max );
   int bin = 0;
-  double area = 0.;
+  double area = 0.0;
   typedef std::vector< double >::const_iterator bIter;
   for ( bIter val = _binContent.begin(); val != _binContent.end(); ++val )
   {
@@ -197,9 +197,9 @@ void Hist::draw( const std::string& file ) const
   // Prepare the canvas to draw the histograms.
   TCanvas canvas( _name.c_str() );
   if ( _withResiduals )
-    canvas.Divide( 1, 2, .1, .1 );
+    canvas.Divide( 1, 2, 0.1, 0.1 );
   else
-    canvas.Divide( 1, 1, .1, .1 );
+    canvas.Divide( 1, 1, 0.1, 0.1 );
 
   // Draw everything on the canvas.
   draw( canvas, data, resids, pdf );

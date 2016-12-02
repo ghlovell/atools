@@ -16,7 +16,7 @@ private:
   std::string             _name;
   std::string             _title;
   bool                    _withResiduals;
-  int                     _nbins;
+  unsigned                _nbins;
   double                  _min;
   double                  _max;
   std::vector< double >   _binContent;
@@ -48,7 +48,7 @@ private:
 
 
 public:
-  Hist( const int& nbins, const double& min, const double& max )
+  Hist( const unsigned& nbins, const double& min, const double& max )
     : _name         ( ""    ),
       _title        ( ""    ),
       _withResiduals( true  ),
@@ -82,7 +82,7 @@ public:
   const int    bin       ( const double& val ) const;
   const double binCenter ( const int&    bin ) const;
   const double binContent( const int&    bin ) const { return _binContent[ bin ]; };
-  static const double binCenter( const int& bin, const int& nbins, const double& min, const double& max );
+  static const double binCenter( const int& bin, const unsigned& nbins, const double& min, const double& max );
 };
 
 
