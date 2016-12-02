@@ -6,6 +6,7 @@
 
 #include <cfit/dataset.hh>
 #include <cfit/pdfbase.hh>
+#include <cfit/region.hh>
 
 #include <root/TH1D.h>
 #include <root/TPad.h>
@@ -34,6 +35,9 @@ private:
                                   //    PdfBase::project( field ) is defined.
 
   bool                    _logscale;
+
+  // Specify an integration region, if any.
+  Region                  _region;
 
   TH1D* residuals( const TH1D& data, const TH1D* pdf ) const;
 
@@ -85,6 +89,8 @@ public:
   void addData ( const Dataset&  data, const std::string& field );
   void addPdf  ( const PdfModel& pdf );
   void addPdf  ( const PdfExpr&  pdf );
+
+  void setRegion( const Region& region ) { _region = region; }
 
   const double pdf( const double& x ) const;
 

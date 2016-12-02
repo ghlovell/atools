@@ -135,22 +135,26 @@ TH1D* Hist::project( const std::string& field, const double& area ) const
 {
   TH1D* pdf = new TH1D( ( "pdf_" + _name ).c_str(), _title.c_str(), _nbins, _min, _max );
 
-  double&& yield = _pdf->yield();
+  // Calculate the yield. Needed if pdf range has been restricted.
+  double yield = 0.0;
+  for ( unsigned x = 0; x < _nbins; ++x )
+    yield += _pdf->project( field, binCenter( x, _nbins, _min, _max ), _region );
+
+  // If yield is zero, then the pdf is zero at all evaluated points.
+  //    Set yield to any value, just to avoid a nan. In such a case,
+  //    the bin content will be 0 anyway.
+  if ( yield == 0.0 )
+    yield = 1.0;
 
   // Evaluate the model in a wide region of points.
   double pdfval = 0.0;
   for ( unsigned x = 0; x < _nbins; ++x )
   {
-    pdfval = _pdf->project( field, binCenter( x, _nbins, _min, _max ) );
+    pdfval = _pdf->project( field, binCenter( x, _nbins, _min, _max ), _region );
 
-    // Temporarily very dirty integration, until integration is sorted out in cfit.
-    if ( dynamic_cast< PdfModel* >( _pdf ) )
-      yield = dynamic_cast< PdfModel* >( _pdf )->area( _min, _max );
 
-    if ( dynamic_cast< PdfExpr* >( _pdf ) )
-      yield = dynamic_cast< PdfExpr* >( _pdf )->area( _field, _min, _max );
 
-    pdf->SetBinContent( x + 1, area * pdfval * ( _max - _min ) / double( _nbins * yield ) );
+    pdf->SetBinContent( x + 1, area * pdfval / yield );
   }
 
   return pdf;
