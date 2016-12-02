@@ -197,6 +197,10 @@ void Hist::draw( const std::string& file ) const
     data.SetBinContent( 1 + bin++, *val );
   }
 
+  // Set unit area for plots of pdfs without data.
+  if ( area == 0.0 )
+    area = 1.0;
+
   data.SetBinErrorOption( TH1::kPoisson );
 
   // ALERT: this is an allocation. This histogram has to be deallocated in this function.
