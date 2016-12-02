@@ -39,7 +39,11 @@ public:
   int  getEntry    ( const long& entry  );
 
   // Getters.
-  const unsigned        nEvt(                            ) const { return _chain->GetEntries(); };
+  const unsigned        nEvt(                            ) const { return _chain->GetEntries();                 };
+  const unsigned        nEvt( const std::string& varname ) const { return _chain->GetEntries( varname.data() ); };
+  const double          min ( const std::string& varname, const double& def = 0.0 ) const;
+  const double          max ( const std::string& varname, const double& def = 0.0 ) const;
+
   template< class T > T get ( const std::string& varname ) const throw( BranchException );
   template< class T > T get ( const std::string& varname, const T& defaultVal ) const;
 };

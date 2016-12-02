@@ -31,7 +31,7 @@ TupleData::TupleData( const std::string& branch, const std::string& files )
   while( stream >> file )
   {
     std::cout << "   * " << file << std::endl;
-    nFiles += _chain->Add( file.c_str() );
+    nFiles += _chain->Add( file.data() );
   }
   setAddresses();
 
@@ -122,5 +122,23 @@ int TupleData::getEntry( const long& entry )
 
   // Read contents of specified entry and return the entry number.
   return _chain->GetEntry( entry );
+}
+
+
+const double TupleData::min( const std::string& varname, const double& def ) const
+{
+  if ( nEvt( varname ) )
+    return _chain->GetMinimum( varname.data() );
+
+  return def;
+}
+
+
+const double TupleData::max( const std::string& varname, const double& def ) const
+{
+  if ( nEvt( varname ) )
+    return _chain->GetMaximum( varname.data() );
+
+  return def;
 }
 
