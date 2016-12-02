@@ -317,7 +317,11 @@ const Parameter Utils::makePar( const std::string& name, std::string info )
       unset = false;
     }
     else if ( token != ")" )
-      std::cout << "Don't know what to do with token " << token << std::endl;
+    {
+      std::cerr << "\e[91mDon't know what to do with token " << token << "\e[0m" << std::endl;
+      std::cerr << "\e[91mExpression \"\e[1m" << info << "\e[21m\" is not a parameter initialization.\e[0m" << std::endl;;
+      throw std::exception();
+    }
   }
 
   if ( unset )
