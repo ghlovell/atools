@@ -343,15 +343,15 @@ const Parameter Utils::makePar( const std::string& name, std::string info )
 //    parameter name to be read from it.
 const Parameter Utils::makePar( const ConfigFile& config, const std::string& name )
 {
-  std::string kstype = "";
-  try
-  {
-    kstype = config.read< std::string >( "kstype" );
-  }
-  catch( ConfigFile::key_not_found& exc )
-  {}
+  const std::string& prefix = config.read< std::string >( "prefix", "" );
+  const std::string& suffix = config.read< std::string >( "suffix", "" );
 
-  return makePar( name + ( kstype != "" ? "_" : "" ) + kstype, config.read< std::string >( name ) );
+  std::string parname;
+  parname += prefix + ( prefix.empty() ? "" : "_" );
+  parname += name;
+  parname += ( suffix.empty() ? "" : "_" ) + suffix;
+
+  return makePar( parname, config.read< std::string >( name ) );
 }
 
 
@@ -360,30 +360,26 @@ const Parameter Utils::makePar( const ConfigFile& config, const std::string& nam
 //    parameter name to be read from it.
 const Parameter Utils::makePar( const ConfigFile& config, const std::string& section, const std::string& name )
 {
-  std::string kstype = "";
-  try
-  {
-    kstype = config.readSection< std::string >( section, "kstype" );
-  }
-  catch( ConfigFile::key_not_found& exc )
-  {
-    kstype = section;
-  }
-  catch( ConfigFile::section_not_found& exc )
-  {
-    kstype = section;
-  }
+  // No need to catch exceptions. If any of these section readings throws ConfigFile::section_not_found,
+  //    this function would throw anyway at the return line.
+  const std::string& prefix = config.readSection< std::string >( section, "prefix", "" );
+  const std::string& suffix = config.readSection< std::string >( section, "suffix", "" );
 
-  return makePar( name + ( kstype != "" ? "_" : "" ) + kstype, config.readSection< std::string >( section, name ) );
+  std::string parname;
+  parname += prefix + ( prefix.empty() ? "" : "_" );
+  parname += name;
+  parname += ( suffix.empty() ? "" : "_" ) + suffix;
+
+  return makePar( parname, config.readSection< std::string >( section, name ) );
 }
 
 
 
 // Create a cfit Parameter from a configuration file and the
 //    parameter name to be read from it.
-const Parameter Utils::makePar( const ConfigFile& config, const std::string& section, const std::string& name, const std::string& kstype )
+const Parameter Utils::makePar( const ConfigFile& config, const std::string& section, const std::string& name, const std::string& suffix )
 {
-  return makePar( name + ( kstype != "" ? "_" : "" ) + kstype, config.readSection< std::string >( section, name ) );
+  return makePar( name + ( suffix != "" ? "_" : "" ) + suffix, config.readSection< std::string >( section, name ) );
 }
 
 
