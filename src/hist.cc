@@ -45,7 +45,8 @@ const double Hist::pdf( const double& x ) const
 
 void Hist::setData( const Dataset& data, const std::string& field )
 {
-  _binContent.assign( _nbins, 0. );
+  _binContent.assign( _nbins, 0.0 );
+  _allocatedData = true;
 
   std::vector< double > values = data.values( field );
   typedef std::vector< double >::const_iterator dIter;
@@ -65,6 +66,12 @@ void Hist::setData( const Dataset& data, const std::string& field )
 
 void Hist::addData( const Dataset& data, const std::string& field )
 {
+  if ( ! _allocatedData )
+  {
+    _binContent.assign( _nbins, 0.0 );
+    _allocatedData = true;
+  }
+
   std::vector< double > values = data.values( field );
   typedef std::vector< double >::const_iterator dIter;
   unsigned binIdx; // Bin index.

@@ -19,6 +19,8 @@ private:
   unsigned                _nbins;
   double                  _min;
   double                  _max;
+
+  bool                    _allocatedData;
   std::vector< double >   _binContent;
   std::vector< PdfBase* > _pdfs;
 
@@ -55,6 +57,7 @@ public:
       _nbins        ( nbins ),
       _min          ( min   ),
       _max          ( max   ),
+      _allocatedData( false ),
       _underflow    ( 0.0   ),
       _overflow     ( 0.0   ),
       _pdf          ( 0     ),
