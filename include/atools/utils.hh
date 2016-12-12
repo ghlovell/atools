@@ -52,6 +52,7 @@ public:
 
   static       bool startsWith( const std::string& str, const std::string& start );
   static       bool endsWith  ( const std::string& str, const std::string& end   );
+  static       bool contains  ( const std::string& str, const std::string& subst );
 
   template <class T>
   static       bool contains  ( const std::vector< T >& vec, const T& value )

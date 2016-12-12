@@ -104,6 +104,12 @@ bool Utils::endsWith( const std::string& str, const std::string& end )
 }
 
 
+bool Utils::contains( const std::string& str, const std::string& substr )
+{
+  return str.find( substr ) != std::string::npos;
+}
+
+
 const int Utils::precision( const double& value, const int& digits )
 {
   return digits - 2 + 2 * ( std::abs( value ) > 1 ) - ( value < 0.0 ) - std::abs( std::ceil( std::log10( std::abs( value ) ) ) );
