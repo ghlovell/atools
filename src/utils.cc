@@ -86,6 +86,16 @@ const std::string Utils::conjugate( const std::string& str )
 }
 
 
+const std::string Utils::nosigns( const std::string& str )
+{
+  std::string result = str;
+  result = Utils::replace( result, "+", "" );
+  result = Utils::replace( result, "-", "" );
+
+  return result;
+}
+
+
 bool Utils::startsWith( const std::string& str, const std::string& start )
 {
   if ( str.length() < start.length() )
