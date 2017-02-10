@@ -204,7 +204,17 @@ T ConfigFile::readSection( const std::string& section, const std::string& key ) 
   // Find the key in the section map
   ConfigFile::mapci p = find( section, key );
   if ( p == it->second.end() )
-    throw key_not_found( key );
+  {
+    // If the section defines "same = other_section", its content should be the same as other_section,
+    //    unless the key is found in the given section, in which case it overrides the default in other_section.
+    // Try to find the key in a section referenced by the key "same".
+    p = find( section, "same" );
+
+    if ( p == it->second.end() )
+      throw key_not_found( key );
+
+    return readSection< T >( p->second, key );
+  }
 
   // Convert it to the templatized type
   return string_as_T< T >( p->second );
@@ -222,7 +232,19 @@ T ConfigFile::readSection( const std::string& section, const std::string& key, c
   // Find the key in the section map
   ConfigFile::mapci p = find( section, key );
   if ( p == it->second.end() )
-    return value;
+  {
+    // If the section defines "same = other_section", its content should be the same as other_section,
+    //    unless the key is found in the given section, in which case it overrides the default in other_section.
+    // Try to find the key in a section referenced by the key "same".
+    p = find( section, "same" );
+
+    // If not found in the "same" section, return the default value.
+    if ( p == it->second.end() )
+      return value;
+
+    return readSection< T >( p->second, key );
+  }
+
 
   // Convert it to the templatized type
   return string_as_T< T >( p->second );
