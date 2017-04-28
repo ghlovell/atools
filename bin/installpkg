@@ -1,0 +1,400 @@
+#! /usr/bin/python
+
+import os
+import sys
+import tarfile
+import tempfile
+import shutil
+import hashlib
+import types
+import re
+
+
+# If a bin/installpkg file exists, use that one.
+if sys.argv[ 0 ] != 'bin/installpkg' and os.path.exists( 'bin/installpkg' ):
+    sys.exit( os.system( 'bin/installpkg' ) )
+
+
+if len( sys.argv ) > 1:
+    dest = sys.argv[ 1 ]
+else:
+    dest = os.environ.get( 'usr' ) or os.path.expanduser( '~/usr' )
+
+if os.path.exists( '%s/lib/python2.7/site-packages/yaml' % dest ):
+    sys.path.append( '%s/lib/python2.7/site-packages' % dest )
+
+try:
+    import yaml
+except:
+    print '\x1b[93mInstalling the \x1b[1myaml\x1b[21m library.\x1b[96m'
+
+    # Get the source.
+    import urllib2
+    response = urllib2.urlopen( 'http://pyyaml.org/download/pyyaml/PyYAML-3.11.tar.gz' )
+
+    # Get the tar content in a tarfile object.
+    from cStringIO import StringIO
+    tar = tarfile.open( fileobj = StringIO( response.read() ), mode = 'r:gz' )
+
+    # Prepare a temporary directory for the package source.
+    tmpdir = tempfile.mkdtemp()
+
+    # Uncompress the downloaded tar file content.
+    tar.extractall( tmpdir )
+
+    # Install the package.
+    os.system( 'cd %s/PyYAML-3.11; python setup.py --without-libyaml install --prefix=%s' % ( tmpdir, dest ) )
+
+    # Cleanup.
+    shutil.rmtree( tmpdir )
+    sys.stdout.write( '\x1b[0m' )
+
+    sys.path.append( '%s/lib/python2.7/site-packages' % dest )
+
+    import yaml
+
+
+
+
+# Utilities class.
+class Utils:
+    # Look for a cmt configuration in a given path.
+    @staticmethod
+    def cmtcfg( path ):
+        match, n = re.subn( r'.*/([^/]*-[^/]*-[^/]*-[^/]*).*', r'\1', path )
+
+        if n:
+            return match
+
+        return None
+
+    # Look for a root version in a given path.
+    @staticmethod
+    def rootver( path ):
+        match, n = re.subn( r'.*/root-([^/]*).*', r'\1', path )
+
+        if n:
+            return match
+
+        return None
+
+    # Get the package name as the directory name of the package.
+    @staticmethod
+    def pkgname():
+        if not os.system( 'git rev-parse --show-toplevel > /dev/null 2>&1' ):
+            return os.path.basename( os.popen( 'git rev-parse --show-toplevel' ).read().strip() )
+
+        return os.path.basename( os.path.abspath( '.' ) )
+
+    # Get the git revision if any.
+    @staticmethod
+    def gitrev():
+        if not os.system( 'git show -s --format=%H HEAD > /dev/null 2>&1' ):
+            return os.popen( 'git show -s --format=%H HEAD' ).read().strip()
+
+        return None
+
+
+
+class Package:
+    def __init__( self, name, objects = None ):
+        self._name = name
+
+        # Git revision.
+        self._gitrev = None
+
+        # Git difference and its sha1 hash.
+        self._gitdiff = None
+        self._sha     = None
+
+        self._pkgdata = { 'revision' : { 'commit' : self._gitrev,
+                                         'patch'  : self._sha     } }
+
+        # Construct depending on the objects type.
+        self._objects = []
+        if type( objects ) is types.DictType:
+            self.buildFromDict( objects )
+        if type( objects ) is types.StringType:
+            self.buildFromPath( objects )
+
+
+    # Builder to construct the objects from given information contained in a dictionary.
+    def buildFromDict( self, objects ):
+        for category, elements in objects.iteritems():
+            if category == 'revision':
+                # Add revision information.
+                self._pkgdata = { category : elements }
+            else:
+                # Add components information.
+                for name, properties in elements.iteritems():
+                    self._objects += [ Info( category, name, properties ) ]
+
+    # Builder to construct the objects from the files contained in an installation path.
+    def buildFromPath( self, installdir ):
+        # Get git revision from the current path.
+        self._gitrev = Utils.gitrev()
+
+        # Get patch content and hash from the current path.
+        if not os.system( 'git diff > /dev/null' ):
+            self._gitdiff = os.popen( 'git diff | cat' ).read()
+
+            # If it's empty, consider it does not exist.
+            if self._gitdiff == '':
+                self._gitdiff = None
+
+            # Get the sha1 hash of the diff information.
+            if self._gitdiff:
+                sha1 = hashlib.sha1()
+                sha1.update( self._gitdiff )
+                self._sha = sha1.hexdigest()
+
+        # Fill the revision information from the values obtained.
+        self._pkgdata = { 'revision' : { 'commit' : self._gitrev,
+                                         'patch'  : self._sha     } }
+
+        # Add information on the binaries found. Consider only directories that contain some files.
+        for path, dirs, files in os.walk( os.path.expanduser( '%s/bin' % installdir ) ):
+            if len( files ):
+                for file in files:
+                    self._objects += [ Info( 'bins', '%s/%s' % ( path.split( '%s/' % installdir )[ 1 ], file ), None ) ]
+
+        # Add information on the header directories found. Consider only directories that contain some files.
+        for path, dirs, files in os.walk( os.path.expanduser( '%s/include' % installdir ) ):
+            if len( files ):
+                self._objects += [ Info( 'headers', path.split( '%s/' % installdir )[ 1 ], None ) ]
+
+        # Add information on the libraries found. Consider only directories that contain some files.
+        for path, dirs, files in os.walk( os.path.expanduser( '%s/lib' % installdir ) ):
+            if len( files ):
+                for file in files:
+                    info = {}
+
+                    # Find the cmt configuration, if any.
+                    cmtcfg = Utils.cmtcfg( path )
+                    if cmtcfg:
+                        info.update( { 'cmtcfg' : cmtcfg } )
+
+                    # Find the root version, if any.
+                    rootver = Utils.rootver( path )
+                    if rootver:
+                        info.update( { 'rootver' : rootver } )
+
+                    self._objects += [ Info( 'libs', '%s/%s' % ( path.split( '%s/' % installdir )[ 1 ], file ), info ) ]
+
+    # Getters.
+    def gitrev( self ):
+        return self._gitrev
+
+    def gitdiff( self ):
+        return self._gitdiff
+
+    def patch( self ):
+        return self._gitdiff
+
+    def patchname( self ):
+        return self._sha
+
+    def insert( self, object ):
+        self._objects += [ object ]
+
+
+    # Update the current package information with information from another package revision.
+    def update( self, package ):
+        # Create a searchable dictionary of information objects.
+        infodict = dict( ( info.name(), info ) for info in package._objects )
+
+        # Update the existing objects.
+        for obj in self._objects:
+            # Update the existing properties.
+            info       = infodict.get( obj.name() )
+            properties = None
+            if info:
+                properties = infodict.get( obj.name() ).properties()
+            if obj.properties():
+                if properties:
+                    # If the new install replaces this object, it will have a global commit and patch.
+                    obj.properties().pop( 'commit', None )
+                    obj.properties().pop( 'patch' , None )
+                    obj.updateProperties( properties.copy() )
+                else:
+                    # If the new package information does not replace this object, keep the current
+                    #    revision information, since the global information will be replaced.
+                    if self._pkgdata != package._pkgdata:
+                        obj.updateProperties( self._pkgdata.copy() )
+
+        # Update information on new objects.
+        currentobjs = [ info.name() for info in self._objects ]
+        for name, obj in infodict.iteritems():
+            # Only do it for new objects. Already existing have already been updated above.
+            if name not in currentobjs:
+                self.insert( obj )
+
+        # Update the revision information.
+        self._pkgdata = package._pkgdata
+
+
+    # Print the package information
+    def dump( self ):
+        tree = self._pkgdata.copy()
+        for info in self._objects:
+            for key, value in info.dict().iteritems():
+                if tree.get( key ):
+                    tree[ key ].update( value )
+                else:
+                    tree[ key ] = value
+
+        # Avoid internal references to branches in the tree for clearer visualization.
+        noalias = yaml.dumper.SafeDumper
+        noalias.ignore_aliases = lambda self, data: True
+        return yaml.dump( { self._name : tree }, default_flow_style = False, Dumper = noalias )
+
+
+class Info:
+    def __init__( self, category, name, properties = None ):
+        self._category   = category
+        self._name       = name
+        self._properties = properties
+
+    # Getters
+    def category( self ):
+        return self._category
+
+    def name( self ):
+        return self._name
+
+    def properties( self ):
+        return self._properties
+
+    def dict( self ):
+        return { self._category : { self._name : self._properties } }
+
+    # Setter
+    def setProperties( self, properties ):
+        self.properties = properties
+
+    # Recursive properties dictionary update function.
+    @staticmethod
+    def updatePropertiesDict( left, right ):
+        for key, value in left.iteritems():
+            prop = right.get( key )
+            if prop:
+                if type( value ) is types.DictType:
+                    updatePropertiesDict( value, prop )
+                else:
+                    value = prop
+
+    def updateProperties( self, properties ):
+        # Update the existing properties.
+        if self._properties:
+            self.updatePropertiesDict( self._properties, properties )
+
+        # If the property is the revision information, add it if it does not exist.
+        rev = properties.get( 'revision' )
+        if rev:
+            if self._properties:
+                # Only add additional information if it does not already exist,
+                #    and if the new information is not null.
+                # ALERT!!: This adds patch information if there's commit information but not patch information.
+                self._properties.update( dict( ( key, value ) for key, value in rev.iteritems() if not self._properties.get( key ) and value ) )
+            else:
+                # Only add additional information if it is not null.
+                self._properties = dict( ( key, value ) for key, value in rev.iteritems() if value )
+
+
+
+
+# Create temporary directory.
+tmpdir = tempfile.mkdtemp()
+
+# Install the package in a temporary directory to inspect the installation content.
+print '\x1b[93mRunning \x1b[1mmake install\x1b[21m into \x1b[1m%s\x1b[21m.\x1b[96m' % tmpdir
+# Treat the special case of minuit separately.
+if os.path.basename( os.path.abspath( os.path.curdir ) ).lower() == 'minuit':
+    tmpmakefile = tempfile.mktemp()
+
+    with open( 'Makefile', 'r' ) as makefile:
+        content = makefile.read()
+
+    content = re.sub( '\nlibdir = .*', '\nlibdir = ${exec_prefix}/lib/${CMTCONFIG}', content )
+
+    with open( 'Makefile', 'w' ) as makefile:
+        makefile.write( content )
+
+    content = re.sub( '\nprefix = .*', '\nprefix = %s' % tmpdir                    , content )
+
+    with open( tmpmakefile, 'w' ) as output:
+        output.write( content )
+
+    if os.system( 'usr=%s make install -f %s' % ( tmpdir, tmpmakefile ) ):
+        print '\x1b[91mAn error occurred while running \x1b[1mmake install\x1b[21m with target \x1b[1m%s\x1b[21m.\x1b[0m' % tmpdir
+        shutil.rmtree( tmpdir )
+        os.remove( tmpmakefile )
+        sys.exit( 1 )
+
+    os.remove( tmpmakefile )
+
+elif os.system( 'usr=%s make install' % tmpdir ):
+    print '\x1b[91mAn error occurred while running \x1b[1mmake install\x1b[21m with target \x1b[1m%s\x1b[21m.\x1b[0m' % tmpdir
+    shutil.rmtree( tmpdir )
+    sys.exit( 1 )
+
+pkgname = Utils.pkgname()
+
+package = Package( pkgname, tmpdir )
+
+# Create possibly missing destination directory.
+if not os.path.exists( dest ):
+    os.mkdir( dest )
+
+# Create possibly missing metadata and patch directories.
+if not os.path.exists( '%s/meta' % dest ):
+    os.mkdir( '%s/meta' % dest )
+
+if not os.path.exists( '%s/meta/patch' % dest ):
+    os.mkdir( '%s/meta/patch' % dest )
+
+
+destfile = None
+metadata = '%s/meta/%s' % ( dest, pkgname )
+if os.path.exists( metadata ):
+    destfile = open( metadata, 'r' )
+    destdata = yaml.load( destfile )
+    destfile.close()
+
+    # Create package information of the currently installed package.
+    destpkg = Package( pkgname, destdata[ pkgname ] )
+
+    # Update the information with the information on the new version.
+    destpkg.update( package )
+
+    # Make a backup of the previous metadata file.
+    os.rename( metadata, '%s.bkp' % metadata )
+
+    # Dump the new information to the metadata file.
+    destfile = open( metadata, 'w' )
+    destfile.write( destpkg.dump() )
+    destfile.close()
+else:
+    destfile = open( metadata, 'w' )
+    destfile.write( package.dump() )
+    destfile.close()
+
+
+# If the new package requires a patch, create the patch file.
+if package.patch():
+    patchdest = '%s/meta/patch/%s.patch' % ( dest, package.patchname() )
+    if not os.path.exists( patchdest ):
+        patch = open( patchdest, 'w' )
+        patch.write( package.patch() )
+        patch.close()
+
+print '\x1b[93mRunning \x1b[1mmake install\x1b[21m into \x1b[1m%s\x1b[21m.\x1b[96m' % dest
+if os.system( 'usr=%s make install' % dest ):
+    print '\x1b[91mAn error occurred while running \x1b[1mmake install\x1b[21m with target \x1b[1m%s\x1b[21m.\x1b[0m' % dest
+    shutil.rmtree( tmpdir )
+    sys.exit( 1 )
+
+
+# Remove temporary directory.
+shutil.rmtree( tmpdir )
+

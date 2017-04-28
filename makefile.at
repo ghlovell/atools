@@ -1,5 +1,5 @@
 
-BINLIST = unblind
+BINLIST = unblind installpkg
 
 PROJECT = atools
 
@@ -78,13 +78,16 @@ $(OFILES): $(ODIR)/%.o: $(CDIR)/%.cc $(DDIR)/%.d $(PKGHDRS) $(MAKEFILE_LIST)
 include $(wildcard $(DFILES))
 
 install: | checkusr $(LIB)
-	@ install -d $(usr)/include/$(PROJECT)
-	@ install -d $(usr)/include/$(TCLAP)
+	@ install -d $(usr)/$(BDIR)
+	@ install -d $(usr)/$(HDIR)/$(PROJECT)
+	@ install -d $(usr)/$(HDIR)/$(TCLAP)
 	@ install -d $(usr)/$(LDIR)
+	@ echo "Installing binaries in $(usr)/$(BDIR)"
+	@ install -D -m 755 $(BFILES)               $(usr)/$(BDIR)
 	@ echo "Installing headers in $(usr)/include/$(PROJECT)"
-	@ install -D -m 644 include/$(PROJECT)/*.hh $(usr)/include/$(PROJECT)
+	@ install -D -m 644 $(HDIR)/$(PROJECT)/*.hh $(usr)/$(HDIR)/$(PROJECT)
 	@ echo "Installing headers in $(usr)/include/$(TCLAP)"
-	@ install -D -m 644 include/$(TCLAP)/*      $(usr)/include/$(TCLAP)
+	@ install -D -m 644 $(HDIR)/$(TCLAP)/*      $(usr)/$(HDIR)/$(TCLAP)
 	@ echo "Installing libraries in $(usr)/$(LDIR)"
 	@ install -D -m 755 $(LIB)                  $(usr)/$(LDIR)
 
