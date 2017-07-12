@@ -242,7 +242,7 @@ T ConfigFile::readSection( const std::string& section, const std::string& key, c
     if ( p == it->second.end() )
       return value;
 
-    return readSection< T >( p->second, key );
+    return readSection< T >( p->second, key, value );
   }
 
 
