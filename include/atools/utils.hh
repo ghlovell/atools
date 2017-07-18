@@ -2,7 +2,12 @@
 #define __UTILS_HH__
 
 #include <string>
+#include <sstream>
 #include <iomanip>
+#include <vector>
+#include <algorithm>
+
+#include <cctype> // For ::toupper and ::tolower.
 
 #include <atools/blind.hh>
 
@@ -50,6 +55,20 @@ public:
   static const std::string replace( const std::string& str, const std::string& pattern, const std::string& replacement );
   static const std::string conjugate( const std::string& str );
   static const std::string nosigns  ( const std::string& str );
+
+  static const std::string toupper( std::string str )
+  {
+    std::transform( str.begin(), str.end(), str.begin(), ::toupper );
+
+    return str;
+  }
+
+  static const std::string tolower( std::string str )
+  {
+    std::transform( str.begin(), str.end(), str.begin(), ::tolower );
+
+    return str;
+  }
 
   static       bool startsWith( const std::string& str, const std::string& start );
   static       bool endsWith  ( const std::string& str, const std::string& end   );
