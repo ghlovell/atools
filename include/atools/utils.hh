@@ -54,6 +54,7 @@ public:
 
   static const std::string replace( const std::string& str, const std::string& pattern, const std::string& replacement );
   static const std::string conjugate( const std::string& str );
+  static const std::string charge   ( const std::string& str );
   static const std::string nosigns  ( const std::string& str );
 
   static const std::string toupper( std::string str )

@@ -86,6 +86,18 @@ const std::string Utils::conjugate( const std::string& str )
 }
 
 
+// Return the charge of the latest instance + or -.
+const std::string Utils::charge( const std::string& str )
+{
+  std::string result = "0";
+
+  for ( std::string::const_iterator ch = str.begin(); ch != str.end(); ++ch )
+    if ( *ch == '+' || *ch == '-' ) result = *ch;
+
+  return result;
+}
+
+
 const std::string Utils::nosigns( const std::string& str )
 {
   std::string result = str;
