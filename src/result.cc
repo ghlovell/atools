@@ -1,4 +1,6 @@
 
+#include <exception>
+
 #include <cfit/parameter.hh>
 
 #include <atools/ConfigFile.hh>
@@ -28,3 +30,13 @@ Result::Result( const std::string& file )
   for( mIter entry = content.begin(); entry != content.end(); ++entry )
     _pars[ entry->first ] = Utils::makePar( entry->first, entry->second );
 }
+
+
+double Result::value( const std::string& key ) const
+{
+  if ( _pars.count( key ) )
+    return _pars.at( key ).value();
+
+  throw std::exception();
+}
+

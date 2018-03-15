@@ -13,6 +13,7 @@ private:
 public:
   Result( const std::string& file );
   const std::map< std::string, Parameter >& parameters() const { return _pars; }
+  double value( const std::string& key ) const;
 };
 
 #endif
