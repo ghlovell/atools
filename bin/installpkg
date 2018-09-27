@@ -338,6 +338,9 @@ elif os.system( 'usr=%s make install' % tmpdir ):
     shutil.rmtree( tmpdir )
     sys.exit( 1 )
 
+# Remove any current color.
+sys.stdout.write( '\x1b[0m' )
+
 pkgname = Utils.pkgname()
 
 package = Package( pkgname, tmpdir )
@@ -394,6 +397,8 @@ if os.system( 'usr=%s make install' % dest ):
     shutil.rmtree( tmpdir )
     sys.exit( 1 )
 
+# Remove any current color.
+sys.stdout.write( '\x1b[0m' )
 
 # Remove temporary directory.
 shutil.rmtree( tmpdir )
