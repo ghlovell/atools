@@ -15,7 +15,7 @@ Result::Result( const std::string& file )
 
   try
   {
-    result = ConfigFile( file, "=", "------" );
+    result = ConfigFile( file, "=", "------" ); // filename, delimiter between key and value (=), and comment character (-----)  
   }
   catch( ConfigFile::file_not_found& fnf )
   {

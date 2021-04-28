@@ -194,7 +194,7 @@ inline bool ConfigFile::string_as_T<bool>( const string& s )
 
 
 template< class T >
-T ConfigFile::readSection( const std::string& section, const std::string& key ) const
+T ConfigFile::readSection( const std::string& section, const std::string& key ) const // First argument is, e.g. ll|bdk-, second argument is the entry within that section
 {
   // Make sure the section exists
   std::map< std::string, std::map< std::string, std::string > >::const_iterator it = myContents.find( section );
@@ -217,7 +217,7 @@ T ConfigFile::readSection( const std::string& section, const std::string& key ) 
   }
 
   // Convert it to the templatized type
-  return string_as_T< T >( p->second );
+  return string_as_T< T >( p->second ); // This is a boolean I think?
 }
 
 
